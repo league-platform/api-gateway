@@ -8,8 +8,12 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: qa
-    
+    environment:
+      name: qa
+
+    env:
+      HOST: ${{ secrets.EC2_QA_IP }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -19,20 +23,30 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.EC2_QA_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H github.com >> ~/.ssh/known_hosts
 
       - name: Deploy to EC2 QA
-        env:
-            HOST: ${{ secrets.EC2_QA_IP }}
         run: |
           ssh -o StrictHostKeyChecking=no ec2-user@$HOST << 'EOF'
             cd /home/ec2-user
+
+            # Clonar si no existe
             if [ ! -d api-gateway ]; then
-              git clone -b qa git@github.com:league-platform/api-gateway.git
+              git clone --branch qa https://${{ secrets.PRIVATE_REPO_TOKEN }}@github.com/league-platform/api-gateway.git
             fi
+
             cd api-gateway
             git reset --hard
             git pull origin qa
-            docker compose down
+
+            # Instalar Docker Compose v2 si no existe
+            if ! command -v docker compose &> /dev/null; then
+              mkdir -p ~/.docker/cli-plugins
+              curl -SL https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-linux-x86_64 \
+                -o ~/.docker/cli-plugins/docker-compose
+              chmod +x ~/.docker/cli-plugins/docker-compose
+            fi
+
+            docker compose down || true
             docker compose up -d --build
           EOF
-
