@@ -10,5 +10,5 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
-    container_name: api-gateway-api-gateway
+    container_name: api-gateway
 
