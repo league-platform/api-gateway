@@ -1,4 +1,4 @@
-name: Deploy API Gateway to EC2
+name: Deploy API Gateway to Production
 
 on:
   push:
@@ -10,18 +10,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout
         uses: actions/checkout@v3
 
       - name: Set up SSH key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.EC2_PROD_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-      - name: Deploy to EC2
+      - name: Deploy to EC2 Prod
         run: |
-          ssh -o StrictHostKeyChecking=no ec2-user@54.162.46.5 << 'EOF'
+          ssh -o StrictHostKeyChecking=no ec2-user@<PROD_IP> << 'EOF'
             cd api-gateway
             git pull origin main
             docker compose down
