@@ -22,19 +22,17 @@ jobs:
 
       - name: Deploy to EC2 QA
         env:
-          HOST: ${{ secrets.EC2_QA_IP }}
+            HOST: ${{ secrets.EC2_QA_HOST }}
         run: |
           ssh -o StrictHostKeyChecking=no ec2-user@$HOST << 'EOF'
             cd /home/ec2-user
-
             if [ ! -d api-gateway ]; then
-              git clone -b qa https://github.com/league-platform/api-gateway.git
+              git clone -b qa git@github.com:league-platform/api-gateway.git
             fi
-
             cd api-gateway
             git reset --hard
             git pull origin qa
-
             docker compose down
             docker compose up -d --build
           EOF
+
