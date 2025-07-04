@@ -20,9 +20,20 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
 
       - name: Deploy to EC2 QA
+        env:
+          HOST: ${{ secrets.EC2_QA_IP }}
         run: |
-          ssh -o StrictHostKeyChecking=no ec2-user@<QA_IP> << 'EOF'
+          ssh -o StrictHostKeyChecking=no ec2-user@$HOST << 'EOF'
+            cd /home/ec2-user
+
+            if [ ! -d api-gateway ]; then
+              git clone -b qa https://github.com/league-platform/api-gateway.git
+            fi
+
             cd api-gateway
+            git reset --hard
             git pull origin qa
+
             docker compose down
             docker compose up -d --build
+          EOF
