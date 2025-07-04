@@ -22,7 +22,7 @@ jobs:
 
       - name: Deploy to EC2 QA
         env:
-            HOST: ${{ secrets.EC2_QA_HOST }}
+            HOST: ${{ secrets.EC2_QA_IP }}
         run: |
           ssh -o StrictHostKeyChecking=no ec2-user@$HOST << 'EOF'
             cd /home/ec2-user
